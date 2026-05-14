@@ -57,6 +57,28 @@ wss.on('connection', (ws, request) => {
     try {
       const message = JSON.parse(data.toString());
       console.log(`Message received from ${clientId}:`, message);
+
+      // if recvd was type chat
+      if(message.type === 'chat'){
+        // send to all clients
+
+        wss.clients.forEach(function each(client) {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({
+              type: 'chat',
+              message: message.content,
+            }));
+          }
+        });
+
+      } else {
+        // otherwise
+        ws.send(JSON.stringify({
+          type: 'echo',
+          message: message,
+        }));
+      }
+
     } catch (error) {
       console.error('Failed to parse message:', error);
       ws.send(JSON.stringify({

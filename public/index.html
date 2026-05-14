@@ -51,7 +51,12 @@
 
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        addMessage(JSON.stringify(data, null, 2), 'received')
+        if(data.type === 'chat'){
+          addMessage(data.message, 'chat')
+        } else {
+          addMessage(JSON.stringify(data, null, 2), 'received')
+        }
+
       };
 
       ws.onclose = (event) => {
