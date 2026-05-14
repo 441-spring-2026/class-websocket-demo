@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Demo</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    #messages { height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    .message { margin: 5px 0; padding: 5px; border-radius: 4px; }
+    .sent { background: #e3f2fd; }
+    .received { background: #f5f5f5; }
+    .chat { background: #f4d9fd; }
+    .system { background: #fff3e0; font-style: italic; }
+    input, button { padding: 10px; margin-right: 10px; }
+    input { width: 300px; }
+  </style>
+</head>
+<body>
+  <h1>WebSocket Demo</h1>
+  <div id="status">Disconnected</div>
+  <div id="messages"></div>
+  <input type="text" id="messageInput" placeholder="Type a message...">
+  <button onclick="sendMessage()">Send</button>
+  <button onclick="connect()">Connect</button>
+  <button onclick="disconnect()">Disconnect</button>
+
+  <script>
+    let ws = null;
+    const messagesDiv = document.getElementById('messages');
+    const statusDiv = document.getElementById('status');
+    const messageInput = document.getElementById('messageInput');
+
+    function addMessage(text, type) {
+      const div = document.createElement('div');
+      div.className = `message ${type}`;
+      div.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // Docs on the websocket web API https://developer.mozilla.org/en-US/docs/Web/API/WebSocket
+    function connect() {
+      // If your server isn't running on port 3000, update this to use correct port
+      ws = new WebSocket(`ws://localhost:3000`);
+
+      ws.onopen = () => {
+        statusDiv.textContent = 'Connected';
+        addMessage('Connection established', 'system');
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        addMessage(JSON.stringify(data, null, 2), 'received')
+      };
+
+      ws.onclose = (event) => {
+        statusDiv.textContent = 'Disconnected';
+        addMessage(`Connection closed (code: ${event.code})`, 'system');
+      };
+
+      ws.onerror = (error) => {
+        addMessage('Connection error', 'system');
+      };
+    }
+
+    function disconnect() {
+      if (ws) {
+        ws.close();
+      }
+    }
+
+    function sendMessage() {
+      const text = messageInput.value.trim();
+      if (text && ws && ws.readyState === WebSocket.OPEN) {
+        const message = { type: 'chat', content: text };
+        ws.send(JSON.stringify(message));
+        addMessage(`Sent: ${text}`, 'sent');
+        messageInput.value = '';
+      }
+    }
+
+    messageInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    // Auto-connect on page load
+    connect();
+  </script>
+</body>
+</html>

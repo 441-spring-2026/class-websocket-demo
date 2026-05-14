@@ -1,0 +1,17 @@
+{
+  "name": "websocket-demo",
+  "version": "1.0.0",
+  "description": "The simplest websocket server",
+  "license": "ISC",
+  "author": "Cheri Allen",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "uuid": "^14.0.0",
+    "ws": "^8.20.1"
+  }
+}
